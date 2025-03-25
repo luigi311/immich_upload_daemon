@@ -33,16 +33,32 @@ jobs:
       - name: "Create PEX"
         run: |
           uvx --python .venv/bin/python pex \
-            dist/immich_upload_daemon-0.1.0-py3-none-any.whl \
+            dist/immich_upload_daemon-*.whl \
             -e immich_upload_daemon.main:main \
             -o dist/immich_upload_daemon.pex \
             --python-shebang '#!/usr/bin/env python3' \
             --scie eager \
             --scie-pbs-stripped
 
-      - name: "Upload PEX"
+      - name: "Setup ruby"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+          
+      - name: "Install fpm"
+        run: gem install fpm
+
+      - name: "Create deb package"
+        run: |
+          VERSION=$(grep -E '^version\s*=' pyproject.toml | head -n1 | sed -E 's/version\s*=\s*"(.*)"/\1/')
+          fpm -s dir -t deb \
+            -n immich-upload-daemon \
+            -v "$VERSION" \
+            dist/immich_upload_daemon=/usr/bin/immich_upload_daemon
+
+      - name: "Upload artifact"
         uses: actions/upload-artifact@v4
         with:
-          name: immich_upload_daemon
-          path: dist/immich_upload_daemon
-          
+          name: immich-upload-daemon
+          path: |
+            *.deb
