@@ -1,7 +1,10 @@
 import asyncio
+import os
 
 from loguru import logger
 from watchdog.events import FileSystemEventHandler
+
+from .database import Database
 
 # Source: https://github.com/immich-app/immich/blob/main/docs/docs/features/supported-formats.md?plain=1
 SUPPORTED_MEDIA_EXTENSIONS = (
@@ -63,3 +66,26 @@ class MediaFileHandler(FileSystemEventHandler):
             self.loop.call_soon_threadsafe(self.queue.put_nowait, event.src_path)
 
 
+async def scan_existing_files(paths: list[str], db: Database) -> None:
+    """
+    Scan the provided directories for existing media files and add them to the database.
+    The scanning is performed in a thread to avoid blocking the event loop.
+    """
+    logger.info("Scanning existing files in provided directories...")
+    for path in paths:
+        # Use asyncio.to_thread to run os.walk in a thread
+        files = await asyncio.to_thread(
+            lambda: [
+                os.path.join(root, f)
+                for root, dirs, files in os.walk(path)
+                for f in files
+                if f.lower().endswith(SUPPORTED_MEDIA_EXTENSIONS)
+            ]
+        )
+        for file_path in files:
+            if os.path.exists(file_path):
+                try:
+                    await db.add_media(file_path)
+                except Exception as e:
+                    logger.error(f"Error processing {file_path}: {e}")
+    logger.info("Finished scanning existing files.")

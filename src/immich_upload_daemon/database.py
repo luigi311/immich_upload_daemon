@@ -1,6 +1,17 @@
 import aiosqlite
+import os
+
 from loguru import logger
 from imohash import hashfile
+from xdg.BaseDirectory import save_data_path
+
+def get_db_path(db_name: str) -> str:
+    """
+    Returns a path for the database file using XDG Base Directory.
+    This creates (if needed) and returns the application's data directory.
+    """
+    app_data_dir = save_data_path("immich_uploader")
+    return os.path.join(app_data_dir, db_name)
 
 class Database:
     def __init__(self, db_file: str) -> None:
@@ -34,8 +45,6 @@ class Database:
     async def add_media(self, file_name: str) -> None:
         """Insert or update the media in the database and reset the uploaded flag."""
         try:
-            logger.info(f"Adding media {file_name}")
-
             # Check if file_name and file_hash already exist in the database.
             file_hash = hashfile(file_name, hexdigest=True)
             async with self.connection.execute(
@@ -48,6 +57,7 @@ class Database:
                 logger.info(f"Media {file_name} already exists in the database")
                 return
 
+            logger.info(f"Adding media {file_name}")
             await self.connection.execute(
                 "INSERT OR REPLACE INTO media (file_name, file_hash, uploaded) VALUES (?, ?, 0)",
                 (file_name, file_hash),

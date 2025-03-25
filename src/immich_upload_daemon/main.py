@@ -4,12 +4,11 @@ import signal
 
 from dotenv import load_dotenv
 from loguru import logger
-from xdg.BaseDirectory import save_data_path
 from watchdog.observers import Observer
 
 from .immich import upload
-from .database import Database
-from .files import MediaFileHandler, SUPPORTED_MEDIA_EXTENSIONS
+from .database import Database, get_db_path
+from .files import MediaFileHandler, scan_existing_files
 
 load_dotenv(override=True)
 
@@ -20,31 +19,6 @@ shutdown_event = asyncio.Event()
 def shutdown():
     logger.info("Received shutdown signal, initiating graceful shutdown...")
     shutdown_event.set()
-
-
-async def scan_existing_files(paths: list[str], db: Database) -> None:
-    """
-    Scan the provided directories for existing media files and add them to the database.
-    The scanning is performed in a thread to avoid blocking the event loop.
-    """
-    logger.info("Scanning existing files in provided directories...")
-    for path in paths:
-        # Use asyncio.to_thread to run os.walk in a thread
-        files = await asyncio.to_thread(
-            lambda: [
-                os.path.join(root, f)
-                for root, dirs, files in os.walk(path)
-                for f in files
-                if f.lower().endswith(SUPPORTED_MEDIA_EXTENSIONS)
-            ]
-        )
-        for file_path in files:
-            if os.path.exists(file_path):
-                try:
-                    await db.add_media(file_path)
-                except Exception as e:
-                    logger.error(f"Error processing {file_path}: {e}")
-    logger.info("Finished scanning existing files.")
 
 
 async def watcher(db: Database, queue: asyncio.Queue):
@@ -73,15 +47,6 @@ async def uploader(db: Database, base_url: str, api_key: str):
             if await upload(base_url, api_key, file_name):
                 await db.mark_uploaded(file_name)
         await asyncio.sleep(5)
-
-
-def get_db_path(db_name: str) -> str:
-    """
-    Returns a path for the database file using XDG Base Directory.
-    This creates (if needed) and returns the application's data directory.
-    """
-    app_data_dir = save_data_path("immich_uploader")
-    return os.path.join(app_data_dir, db_name)
 
 
 async def run():
