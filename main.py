@@ -9,7 +9,7 @@ from watchdog.observers import Observer
 
 from src.immich import upload
 from src.database import Database
-from src.files import MediaFileHandler
+from src.files import MediaFileHandler, SUPPORTED_MEDIA_EXTENSIONS
 
 load_dotenv(override=True)
 
@@ -20,6 +20,31 @@ shutdown_event = asyncio.Event()
 def shutdown():
     logger.info("Received shutdown signal, initiating graceful shutdown...")
     shutdown_event.set()
+
+
+async def scan_existing_files(paths: list[str], db: Database) -> None:
+    """
+    Scan the provided directories for existing media files and add them to the database.
+    The scanning is performed in a thread to avoid blocking the event loop.
+    """
+    logger.info("Scanning existing files in provided directories...")
+    for path in paths:
+        # Use asyncio.to_thread to run os.walk in a thread
+        files = await asyncio.to_thread(
+            lambda: [
+                os.path.join(root, f)
+                for root, dirs, files in os.walk(path)
+                for f in files
+                if f.lower().endswith(SUPPORTED_MEDIA_EXTENSIONS)
+            ]
+        )
+        for file_path in files:
+            if os.path.exists(file_path):
+                try:
+                    await db.add_media(file_path)
+                except Exception as e:
+                    logger.error(f"Error processing {file_path}: {e}")
+    logger.info("Finished scanning existing files.")
 
 
 async def watcher(db: Database, queue: asyncio.Queue):
@@ -92,6 +117,9 @@ async def main():
             os.path.expanduser("~/Pictures"),
             os.path.expanduser("~/Videos"),
         ]
+
+    # First, scan the provided directories for existing media files.
+    await scan_existing_files(paths, db)
 
     loop = asyncio.get_running_loop()
 

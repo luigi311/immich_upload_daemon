@@ -6,6 +6,7 @@ from datetime import datetime
 from loguru import logger
 
 async def upload(base_url: str, api_key: str, file: str) -> bool:
+    logger.info(f'Uploading {file}...')
     stats = os.stat(file)
 
     headers = {
