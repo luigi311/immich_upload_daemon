@@ -138,11 +138,13 @@ dependencies = [
     { name = "aiosqlite" },
     { name = "dotenv" },
     { name = "loguru" },
+    { name = "pyxdg" },
 ]
 
 [package.dev-dependencies]
 dev = [
     { name = "ruff" },
+    { name = "types-pyxdg" },
 ]
 
 [package.metadata]
@@ -151,10 +153,14 @@ requires-dist = [
     { name = "aiosqlite", specifier = ">=0.21.0" },
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "loguru", specifier = ">=0.7.3" },
+    { name = "pyxdg", specifier = ">=0.28" },
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "ruff", specifier = ">=0.11.2" }]
+dev = [
+    { name = "ruff", specifier = ">=0.11.2" },
+    { name = "types-pyxdg", specifier = ">=0.28.0.20240106" },
+]
 
 [[package]]
 name = "loguru"
@@ -259,6 +265,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pyxdg"
+version = "0.28"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b0/25/7998cd2dec731acbd438fbf91bc619603fc5188de0a9a17699a781840452/pyxdg-0.28.tar.gz", hash = "sha256:3267bb3074e934df202af2ee0868575484108581e6f3cb006af1da35395e88b4", size = 77776 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e5/8d/cf41b66a8110670e3ad03dab9b759704eeed07fa96e90fdc0357b2ba70e2/pyxdg-0.28-py2.py3-none-any.whl", hash = "sha256:bdaf595999a0178ecea4052b7f4195569c1ff4d344567bccdc12dfdf02d545ab", size = 49520 },
+]
+
+[[package]]
 name = "ruff"
 version = "0.11.2"
 source = { registry = "https://pypi.org/simple" }
@@ -281,6 +296,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/d9/3a/a647fa4f316482dacf2fd68e8a386327a33d6eabd8eb2f9a0c3d291ec549/ruff-0.11.2-py3-none-win32.whl", hash = "sha256:aca01ccd0eb5eb7156b324cfaa088586f06a86d9e5314b0eb330cb48415097cc", size = 10319835 },
     { url = "https://files.pythonhosted.org/packages/86/54/3c12d3af58012a5e2cd7ebdbe9983f4834af3f8cbea0e8a8c74fa1e23b2b/ruff-0.11.2-py3-none-win_amd64.whl", hash = "sha256:3170150172a8f994136c0c66f494edf199a0bbea7a409f649e4bc8f4d7084080", size = 11373713 },
     { url = "https://files.pythonhosted.org/packages/d6/d4/dd813703af8a1e2ac33bf3feb27e8a5ad514c9f219df80c64d69807e7f71/ruff-0.11.2-py3-none-win_arm64.whl", hash = "sha256:52933095158ff328f4c77af3d74f0379e34fd52f175144cefc1b192e7ccd32b4", size = 10441990 },
+]
+
+[[package]]
+name = "types-pyxdg"
+version = "0.28.0.20240106"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c0/50/24ecc75a19deb9f52d07fe5bc098f8d8304a4d108efce8a445f3d768788c/types-pyxdg-0.28.0.20240106.tar.gz", hash = "sha256:505fc6386d8c0a5d0a914ceb2b76e8e2dbd0b110212b5b395dbeb1c9483edb88", size = 8143 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7e/cd/f0c0c9664df9b5e0b3867f4c15d86c9357bac74eda41511cea9bdf6987e0/types_pyxdg-0.28.0.20240106-py3-none-any.whl", hash = "sha256:963a82433c04c6d28c71c42b1d8d1ccbe13ccf44ea2bd563b6d72d13a5e252a3", size = 11255 },
 ]
 
 [[package]]

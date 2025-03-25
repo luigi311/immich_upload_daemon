@@ -2,6 +2,7 @@ import asyncio
 import os
 from dotenv import load_dotenv
 from loguru import logger
+from xdg.BaseDirectory import save_data_path
 
 from src.immich import upload
 from src.database import Database
@@ -25,6 +26,14 @@ async def uploader(db: Database, base_url: str, api_key: str):
                 await db.mark_uploaded(file_name)
         await asyncio.sleep(5)
 
+def get_db_path(db_name: str) -> str:
+    """
+    Returns a path for the database file using XDG Base Directory.
+    This creates (if needed) and returns the application's data directory.
+    """
+    app_data_dir = save_data_path("immich_uploader")
+    return os.path.join(app_data_dir, db_name)
+
 async def main():
     BASE_URL = os.getenv("BASE_URL", None)
     API_KEY = os.getenv("API_KEY", None)
@@ -36,7 +45,7 @@ async def main():
     # Strip trailing slashes
     BASE_URL = BASE_URL.rstrip("/")
 
-    db = Database("immich.db")
+    db = Database(get_db_path("files.db"))
     await db.init_db()
 
     # Create asynchronous tasks for both the watcher and uploader.
