@@ -1,0 +1,74 @@
+name: Build
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - .gitignore
+      - "*.md"
+  pull_request:
+    paths-ignore:
+      - .gitignore
+      - "*.md"
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            package: deb
+            name: immich-upload-daemon-x86_64.deb
+          - os: ubuntu-24.04-arm
+            package: deb
+            name: immich-upload-daemon-arm64.deb
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: "Install dependencies"
+        run: uv sync --frozen
+        
+      - name: "Build"
+        run: uv build
+
+      - name: "Create PEX"
+        run: |
+          uvx --python .venv/bin/python pex \
+            dist/immich_upload_daemon-*.whl \
+            -e immich_upload_daemon.main:main \
+            -o dist/immich_upload_daemon.pex \
+            --python-shebang '#!/usr/bin/env python3' \
+            --scie eager \
+            --scie-pbs-stripped
+
+      - name: "Setup ruby"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+          
+      - name: "Install fpm"
+        run: gem install fpm
+
+      - name: "Create deb package"
+        run: |
+          VERSION=$(grep -E '^version\s*=' pyproject.toml | head -n1 | sed -E 's/version\s*=\s*"(.*)"/\1/')
+          fpm -s dir -t ${{ matrix.package }} \
+            -n immich-upload-daemon \
+            -v "$VERSION" \
+            dist/immich_upload_daemon=/usr/bin/immich_upload_daemon
+
+      - name: "Upload artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: |
+            *.${{ matrix.package }}

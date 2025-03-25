@@ -7,9 +7,9 @@ from loguru import logger
 from xdg.BaseDirectory import save_data_path
 from watchdog.observers import Observer
 
-from src.immich import upload
-from src.database import Database
-from src.files import MediaFileHandler, SUPPORTED_MEDIA_EXTENSIONS
+from .immich import upload
+from .database import Database
+from .files import MediaFileHandler, SUPPORTED_MEDIA_EXTENSIONS
 
 load_dotenv(override=True)
 
@@ -84,7 +84,7 @@ def get_db_path(db_name: str) -> str:
     return os.path.join(app_data_dir, db_name)
 
 
-async def main():
+async def run():
     BASE_URL = os.getenv("BASE_URL")
     API_KEY = os.getenv("API_KEY")
     media_paths = os.getenv("MEDIA_PATHS")
@@ -164,6 +164,9 @@ async def main():
     await db.close()
     logger.info("Shutdown complete.")
 
+def main():
+    asyncio.run(run())
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
