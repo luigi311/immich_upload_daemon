@@ -25,17 +25,13 @@ async def watcher(db: Database, queue: asyncio.Queue):
     Asynchronous watcher that processes file paths from the queue.
     """
     while not shutdown_event.is_set():
-        try:
-            # Wait for a new file path from the watchdog handler.
-            file_path = await asyncio.wait_for(queue.get(), timeout=10)
+        # Wait for a new file path from the watchdog handler.
+        file_path = await queue.get()
 
-            if os.path.exists(file_path):
-                await db.add_media(file_path)
+        if os.path.exists(file_path):
+            await db.add_media(file_path)
 
-            queue.task_done()
-        except asyncio.TimeoutError:
-            # No new files found during timeout; continue checking.
-            continue
+        queue.task_done()
 
 
 async def uploader(db: Database, base_url: str, api_key: str):
