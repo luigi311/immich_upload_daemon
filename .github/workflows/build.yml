@@ -12,7 +12,17 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            package: deb
+            name: immich-upload-daemon-x86_64.deb
+          - os: ubuntu-24.04-arm
+            package: deb
+            name: immich-upload-daemon-arm64.deb
     steps:
       - uses: actions/checkout@v4
 
@@ -51,7 +61,7 @@ jobs:
       - name: "Create deb package"
         run: |
           VERSION=$(grep -E '^version\s*=' pyproject.toml | head -n1 | sed -E 's/version\s*=\s*"(.*)"/\1/')
-          fpm -s dir -t deb \
+          fpm -s dir -t ${{ matrix.package }} \
             -n immich-upload-daemon \
             -v "$VERSION" \
             dist/immich_upload_daemon=/usr/bin/immich_upload_daemon
@@ -59,6 +69,6 @@ jobs:
       - name: "Upload artifact"
         uses: actions/upload-artifact@v4
         with:
-          name: immich-upload-daemon
+          name: ${{ matrix.name }}
           path: |
-            *.deb
+            *.${{ matrix.package }}
