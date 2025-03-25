@@ -1,0 +1,48 @@
+name: Build
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - .gitignore
+      - "*.md"
+  pull_request:
+    paths-ignore:
+      - .gitignore
+      - "*.md"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: "Install dependencies"
+        run: uv sync --frozen
+        
+      - name: "Build"
+        run: uv build
+
+      - name: "Create PEX"
+        run: |
+          uvx --python .venv/bin/python pex \
+            dist/immich_upload_daemon-0.1.0-py3-none-any.whl \
+            -e immich_upload_daemon.main:main \
+            -o dist/immich_upload_daemon.pex \
+            --python-shebang '#!/usr/bin/env python3' \
+            --scie eager \
+            --scie-pbs-stripped
+
+      - name: "Upload PEX"
+        uses: actions/upload-artifact@v4
+        with:
+          name: immich_upload_daemon
+          path: dist/immich_upload_daemon
+          
