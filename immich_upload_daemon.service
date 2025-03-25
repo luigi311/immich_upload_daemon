@@ -1,0 +1,11 @@
+[Unit]
+Description=Immich Upload Daemon
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/immich_upload_daemon
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
