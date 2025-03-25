@@ -1,5 +1,6 @@
 import aiosqlite
 from loguru import logger
+from imohash import hashfile
 
 class Database:
     def __init__(self, db_file: str) -> None:
@@ -30,20 +31,22 @@ class Database:
             raise RuntimeError("Database connection is not initialized. Call init_db() first.")
         return self.conn
 
-    async def add_media(self, file_name: str, file_hash: str) -> None:
+    async def add_media(self, file_name: str) -> None:
         """Insert or update the media in the database and reset the uploaded flag."""
         try:
             logger.info(f"Adding media {file_name}")
 
-            ## Check if file_name and file_hash already exist in the database.
-            #async with self.connection.execute(
-            #    "SELECT * FROM media WHERE file_name = ? AND file_hash = ?", (file_name, file_hash)
-            #) as cursor:
-            #    row = await cursor.fetchone()
+            # Check if file_name and file_hash already exist in the database.
+            file_hash = hashfile(file_name, hexdigest=True)
+            async with self.connection.execute(
+                "SELECT * FROM media WHERE file_name = ? AND file_hash = ?", (file_name, file_hash)
+            ) as cursor:
+                row = await cursor.fetchone()
 
-            #if row:
-            #    # If the file_name and file_hash already exists, do nothing
-            #    return
+            if row:
+                # If the file_name and file_hash already exists, do nothing
+                logger.info(f"Media {file_name} already exists in the database")
+                return
 
             await self.connection.execute(
                 "INSERT OR REPLACE INTO media (file_name, file_hash, uploaded) VALUES (?, ?, 0)",

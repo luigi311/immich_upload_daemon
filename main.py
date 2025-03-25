@@ -32,7 +32,7 @@ async def watcher(db: Database, queue: asyncio.Queue):
             file_path = await asyncio.wait_for(queue.get(), timeout=10)
 
             if os.path.exists(file_path):
-                await db.add_media(file_path, "hash")
+                await db.add_media(file_path)
 
             queue.task_done()
         except asyncio.TimeoutError:

@@ -42,7 +42,7 @@ async def upload(base_url: str, api_key: str, file: str) -> bool:
                 logger.success(f'{file} uploaded successfully')
                 return True
             elif status == 'duplicate':
-                logger.warning(f'{file} already uploaded')
+                logger.warning(f'{file} is duplicate of {response_json.get("id")}')
                 return True
             logger.error(f'Failed to upload {file}: {response_json}')
             return False
