@@ -10,7 +10,10 @@ load_dotenv(override=True)
 
 async def watcher(db: Database):
     while True:
-        await db.add_media("image.jpg", "hash")
+        file_path = "image.jpg"
+        if os.path.exists(file_path):
+            await db.add_media(file_path, "hash")
+   
         await asyncio.sleep(10)
 
 async def uploader(db: Database, base_url: str, api_key: str):

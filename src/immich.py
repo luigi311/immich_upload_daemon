@@ -35,7 +35,7 @@ async def upload(base_url: str, api_key: str, file: str) -> bool:
             async with session.post(f'{base_url}/assets', headers=headers, data=form) as response:
                 response_json = await response.json()
                 status = response_json.get('status')
-                if status == 'success':
+                if status == 'created':
                     logger.success(f'{file} uploaded successfully')
                     return True
                 elif status == 'duplicate':
