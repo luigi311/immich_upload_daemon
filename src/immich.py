@@ -1,4 +1,5 @@
 import aiohttp
+import aiofiles
 import os
 
 from datetime import datetime
@@ -26,20 +27,22 @@ async def upload(base_url: str, api_key: str, file: str) -> bool:
         form = aiohttp.FormData()
         for key, value in data.items():
             form.add_field(key, value)
-        # Add the file.
-        with open(file, 'rb') as f:
+        
+        async with aiofiles.open(file, 'rb') as f:
+            file_data = await f.read()
             form.add_field('assetData',
-                           f,
+                           file_data,
                            filename=os.path.basename(file),
                            content_type='application/octet-stream')
-            async with session.post(f'{base_url}/assets', headers=headers, data=form) as response:
-                response_json = await response.json()
-                status = response_json.get('status')
-                if status == 'created':
-                    logger.success(f'{file} uploaded successfully')
-                    return True
-                elif status == 'duplicate':
-                    logger.warning(f'{file} already uploaded')
-                    return True
-                logger.error(f'Failed to upload {file}: {response_json}')
-                return False
+
+        async with session.post(f'{base_url}/assets', headers=headers, data=form) as response:
+            response_json = await response.json()
+            status = response_json.get('status')
+            if status == 'created':
+                logger.success(f'{file} uploaded successfully')
+                return True
+            elif status == 'duplicate':
+                logger.warning(f'{file} already uploaded')
+                return True
+            logger.error(f'Failed to upload {file}: {response_json}')
+            return False
