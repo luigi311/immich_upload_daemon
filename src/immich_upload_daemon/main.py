@@ -2,15 +2,14 @@ import asyncio
 import os
 import signal
 
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 from loguru import logger
 from watchdog.observers import Observer
+from xdg.BaseDirectory import xdg_config_home
 
 from .immich import upload
 from .database import Database, get_db_path
 from .files import MediaFileHandler, scan_existing_files
-
-load_dotenv(override=True)
 
 # A global event to signal shutdown
 shutdown_event = asyncio.Event()
@@ -50,12 +49,25 @@ async def uploader(db: Database, base_url: str, api_key: str):
 
 
 async def run():
-    BASE_URL = os.getenv("BASE_URL")
-    API_KEY = os.getenv("API_KEY")
-    media_paths = os.getenv("MEDIA_PATHS")
+    # Load environment variables
+    env_file = os.path.join(xdg_config_home, "immich_upload_daemon", "immich_upload_daemon.env")
+    if not os.path.exists(env_file):
+        # Create the directory if it doesn't exist
+        os.makedirs(os.path.dirname(env_file), exist_ok=True)
+
+        # Create a default env file if it doesn't exist
+        with open(env_file, "w") as f:
+            f.write("BASE_URL=\nAPI_KEY=\nMEDIA_PATHS=\n")
+
+
+    env = dotenv_values(env_file)
+
+    BASE_URL = env.get("BASE_URL")
+    API_KEY = env.get("API_KEY")
+    media_paths = env.get("MEDIA_PATHS")
 
     if not BASE_URL or not API_KEY:
-        logger.error("Please set BASE_URL and API_KEY in .env file")
+        logger.error(f"Please set BASE_URL and API_KEY in {env_file}")
         return
 
     # Strip trailing slashes
