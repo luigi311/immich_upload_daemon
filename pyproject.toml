@@ -11,6 +11,7 @@ dependencies = [
     "dotenv>=0.9.9",
     "loguru>=0.7.3",
     "pyxdg>=0.28",
+    "watchdog>=6.0.0",
 ]
 
 [dependency-groups]
