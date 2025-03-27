@@ -42,7 +42,7 @@ class Database:
             raise RuntimeError("Database connection is not initialized. Call init_db() first.")
         return self.conn
 
-    async def add_media(self, file_name: str) -> None:
+    async def add_media(self, file_name: str) -> bool:
         """Insert or update the media in the database and reset the uploaded flag."""
         try:
             # Check if file_name and file_hash already exist in the database.
@@ -55,7 +55,7 @@ class Database:
             if row:
                 # If the file_name and file_hash already exists, do nothing
                 logger.info(f"Media {file_name} already exists in the database")
-                return
+                return False
 
             logger.info(f"Adding media {file_name}")
             await self.connection.execute(
@@ -63,9 +63,10 @@ class Database:
                 (file_name, file_hash),
             )
             await self.connection.commit()
+            return True
         except Exception as e:
             logger.error(f"Error adding media {file_name}: {e}")
-            raise e
+            return False
 
     async def mark_uploaded(self, file_name: str) -> None:
         try:
@@ -75,7 +76,7 @@ class Database:
             await self.connection.commit()
         except Exception as e:
             logger.error(f"Error marking {file_name} as uploaded: {e}")
-            raise e
+            return
 
     async def get_unuploaded(self) -> list[str]:
         try:

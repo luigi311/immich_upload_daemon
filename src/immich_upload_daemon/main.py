@@ -13,7 +13,7 @@ from .files import MediaFileHandler, scan_existing_files
 
 # A global event to signal shutdown
 shutdown_event = asyncio.Event()
-
+new_file_event = asyncio.Event()
 
 def shutdown():
     logger.info("Received shutdown signal, initiating graceful shutdown...")
@@ -25,23 +25,30 @@ async def watcher(db: Database, queue: asyncio.Queue):
     Asynchronous watcher that processes file paths from the queue.
     """
     while not shutdown_event.is_set():
+        logger.info("Waiting for a new files...")
+
         # Wait for a new file path from the watchdog handler.
         file_path = await queue.get()
 
         if os.path.exists(file_path):
-            await db.add_media(file_path)
+            if await db.add_media(file_path):
+                new_file_event.set()
 
         queue.task_done()
 
 
 async def uploader(db: Database, base_url: str, api_key: str):
     while not shutdown_event.is_set():
+        # Wait for a new file event to upload
+        await new_file_event.wait()
+
         unuploaded = await db.get_unuploaded()
 
         for file_name in unuploaded:
             if await upload(base_url, api_key, file_name):
                 await db.mark_uploaded(file_name)
-        await asyncio.sleep(5)
+        
+        new_file_event.clear()
 
 
 async def run():
@@ -92,7 +99,7 @@ async def run():
         ]
 
     # First, scan the provided directories for existing media files.
-    await scan_existing_files(paths, db)
+    await scan_existing_files(paths, db, new_file_event)
 
     loop = asyncio.get_running_loop()
 

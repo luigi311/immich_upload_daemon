@@ -66,7 +66,7 @@ class MediaFileHandler(FileSystemEventHandler):
             self.loop.call_soon_threadsafe(self.queue.put_nowait, event.src_path)
 
 
-async def scan_existing_files(paths: list[str], db: Database) -> None:
+async def scan_existing_files(paths: list[str], db: Database, new_file_event: asyncio.Event) -> None:
     """
     Scan the provided directories for existing media files and add them to the database.
     The scanning is performed in a thread to avoid blocking the event loop.
@@ -85,7 +85,9 @@ async def scan_existing_files(paths: list[str], db: Database) -> None:
         for file_path in files:
             if os.path.exists(file_path):
                 try:
-                    await db.add_media(file_path)
+                    if await db.add_media(file_path):
+                        new_file_event.set()
+
                 except Exception as e:
                     logger.error(f"Error processing {file_path}: {e}")
     logger.info("Finished scanning existing files.")
