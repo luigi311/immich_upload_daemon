@@ -19,6 +19,40 @@ Immich Upload Daemon is a tool designed to monitor your media directories for ne
 - **Configurable Environment**  
   Easily configure your Immich server details, media paths, and network requirements via an environment file.
 
+## Configuration
+
+Before running the daemon, configure your environment settings:
+
+1. **Environment File**  
+   The daemon expects an environment file at:
+   ```
+   ~/.config/immich_upload_daemon/immich_upload_daemon.env
+   ```
+   If this file doesn’t exist, a default one is generated. Edit the file to set the following variables:
+
+   - **BASE_URL**: Base URL of your Immich server.
+   - **API_KEY**: Your Immich API key.
+   - **MEDIA_PATHS**: Comma-separated directories to monitor (e.g., `~/Pictures, ~/Videos`).
+   - **WIFI_ONLY**: Set to `true` if uploads should occur only over WiFi.
+   - **SSID**: (Optional) Specific WiFi network name to check when WIFI_ONLY is enabled.
+   - **NOT_METERED**: Set to `true` to upload only on non-metered networks.
+   - **DEBUG**: Enable debugging logs when set to `true`.
+
+   Adjust these values according to your setup.
+
+## Running the Daemon
+
+Once installed, run the daemon by starting the service:
+```sh
+systemctl --user enable immich_upload_daemon
+systemctl --user start immich_upload_daemon
+```
+
+or manually running the binary
+```sh
+immich_upload_daemon
+```
+
 ## Installation
 
 ### Packaged
@@ -94,43 +128,6 @@ This project uses [uv](https://github.com/astral-sh/uv) for dependency managemen
 
 6. **Install the Service File**  
    Copy the `immich_upload_daemon.service` file to your systemd user directory (typically `~/.config/systemd/user/` or `/usr/lib/systemd/user/`).
-
-7. **Enable and Start the Service**  
-   Enable and start the daemon with:
-   ```sh
-   systemctl --user enable immich_upload_daemon
-   systemctl --user start immich_upload_daemon
-   ```
-
-## Configuration
-
-Before running the daemon, configure your environment settings:
-
-1. **Environment File**  
-   The daemon expects an environment file at:
-   ```
-   ~/.config/immich_upload_daemon/immich_upload_daemon.env
-   ```
-   If this file doesn’t exist, a default one is generated. Edit the file to set the following variables:
-
-   - **BASE_URL**: Base URL of your Immich server.
-   - **API_KEY**: Your Immich API key.
-   - **MEDIA_PATHS**: Comma-separated directories to monitor (e.g., `~/Pictures, ~/Videos`).
-   - **WIFI_ONLY**: Set to `true` if uploads should occur only over WiFi.
-   - **SSID**: (Optional) Specific WiFi network name to check when WIFI_ONLY is enabled.
-   - **NOT_METERED**: Set to `true` to upload only on non-metered networks.
-   - **DEBUG**: Enable debugging logs when set to `true`.
-
-   Adjust these values according to your setup.
-
-## Running the Daemon
-
-Once built or installed, run the daemon by executing the generated binary:
-```sh
-/usr/bin/immich_upload_daemon
-```
-
-
 
 ## Development
 
