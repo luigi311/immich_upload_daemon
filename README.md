@@ -121,9 +121,10 @@ This project uses [uv](https://github.com/astral-sh/uv) for dependency managemen
    fpm -s dir -t deb \
        -n immich-upload-daemon \
        -v "$VERSION" \
-       --after-install postinst \
-       dist/immich_upload_daemon=/usr/bin/immich_upload_daemon \
-       immich_upload_daemon.service=/usr/lib/systemd/user/immich_upload_daemon.service
+       --deb-systemd systemd/immich_upload_daemon.service \
+       --deb-systemd-path /usr/lib/systemd/user \
+       dist/immich_upload_daemon=/usr/bin/immich_upload_daemon
+       
    ```
 
 6. **Install the Service File**  

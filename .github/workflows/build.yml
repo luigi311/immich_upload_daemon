@@ -64,9 +64,9 @@ jobs:
           fpm -s dir -t ${{ matrix.package }} \
             -n immich-upload-daemon \
             -v "$VERSION" \
-            --after-install postinst \
-            dist/immich_upload_daemon=/usr/bin/immich_upload_daemon \
-            systemd/immich_upload_daemon.service=/usr/lib/systemd/user/immich_upload_daemon.service
+            --deb-systemd systemd/immich_upload_daemon.service \
+            --deb-systemd-path /usr/lib/systemd/user \
+            dist/immich_upload_daemon=/usr/bin/immich_upload_daemon 
 
       - name: "Upload artifact"
         uses: actions/upload-artifact@v4
