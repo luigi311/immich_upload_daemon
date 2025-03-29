@@ -1,6 +1,7 @@
 import asyncio
 import os
 
+import aiofiles
 from loguru import logger
 from watchdog.events import FileSystemEventHandler
 
@@ -96,3 +97,12 @@ async def scan_existing_files(paths: list[str], db: Database, new_file_event: as
         new_file_event.set()
 
     logger.info("Finished scanning existing files.")
+
+
+async def file_chunk_generator(file_path, chunk_size=8192):
+    async with aiofiles.open(file_path, 'rb') as f:
+        while True:
+            chunk = await f.read(chunk_size)
+            if not chunk:
+                break
+            yield chunk
