@@ -66,7 +66,7 @@ jobs:
             -v "$VERSION" \
             --after-install postinst \
             dist/immich_upload_daemon=/usr/bin/immich_upload_daemon \
-            immich_upload_daemon.service=/usr/lib/systemd/user/immich_upload_daemon.service
+            systemd/immich_upload_daemon.service=/usr/lib/systemd/user/immich_upload_daemon.service
 
       - name: "Upload artifact"
         uses: actions/upload-artifact@v4
