@@ -7,10 +7,6 @@ from loguru import logger
 
 async def upload(base_url: str, api_key: str, file: str) -> bool:
     logger.info(f'Uploading {file}...')
-    if not os.path.exists(file):
-        logger.warning(f"{file} has been removed from the system, marking as complete")
-        return True
-
     stats = os.stat(file)
 
     headers = {
