@@ -1,7 +1,9 @@
 import asyncio
 import os
 import signal
+import sys
 
+from aiofiles import open
 from dotenv import dotenv_values
 from loguru import logger
 from watchdog.observers import Observer
@@ -10,10 +12,13 @@ from xdg.BaseDirectory import xdg_config_home
 from .immich import upload
 from .database import Database, get_db_path
 from .files import MediaFileHandler, scan_existing_files
+from .network import check_network_conditions
+from .utils import str_to_bool
 
 # A global event to signal shutdown
 shutdown_event = asyncio.Event()
 new_file_event = asyncio.Event()
+
 
 def shutdown():
     logger.info("Received shutdown signal, initiating graceful shutdown...")
@@ -37,37 +42,87 @@ async def watcher(db: Database, queue: asyncio.Queue):
         queue.task_done()
 
 
-async def uploader(db: Database, base_url: str, api_key: str):
+async def uploader(
+    db: Database,
+    base_url: str,
+    api_key: str,
+    wifi_only: bool,
+    ssid: str | None,
+    not_metered: bool,
+):
     while not shutdown_event.is_set():
         # Wait for a new file event to upload
         await new_file_event.wait()
 
+        while True:
+            condition = await check_network_conditions(wifi_only, ssid, not_metered)
+            if condition:
+                break
+
+            logger.warning("Rechecking network condition in 10 mins")
+            await asyncio.sleep(60 * 10)
+
         unuploaded = await db.get_unuploaded()
+
+        # Only clear when unuploaded comes back empty to prevent issues with 
+        # new files being discovered during the uploading process
+        if not unuploaded:
+            new_file_event.clear()
+            logger.info("Waiting for a new files...")
 
         for file_name in unuploaded:
             if await upload(base_url, api_key, file_name):
                 await db.mark_uploaded(file_name)
-        
-        new_file_event.clear()
+
+
+async def create_default_config(env_file: str):
+    # Create a default env file if it doesn't exist
+    async with open(env_file, "w") as f:
+        await f.write(
+            """BASE_URL=
+API_KEY=
+MEDIA_PATHS=
+WIFI_ONLY=
+SSID=
+NOT_METERED=
+DEBUG=True
+"""
+        )
+
+
+def configure_logger(debug: bool) -> None:
+    # Remove default logger to configure our own
+    logger.remove()
+
+    level = "INFO"
+    if debug:
+        level = "DEBUG"
+
+    logger.add(sys.stdout, level=level)
 
 
 async def run():
     # Load environment variables
-    env_file = os.path.join(xdg_config_home, "immich_upload_daemon", "immich_upload_daemon.env")
+    env_file = os.path.join(
+        xdg_config_home, "immich_upload_daemon", "immich_upload_daemon.env"
+    )
     if not os.path.exists(env_file):
         # Create the directory if it doesn't exist
         os.makedirs(os.path.dirname(env_file), exist_ok=True)
 
-        # Create a default env file if it doesn't exist
-        with open(env_file, "w") as f:
-            f.write("BASE_URL=\nAPI_KEY=\nMEDIA_PATHS=\n")
-
+        await create_default_config(env_file)
 
     env = dotenv_values(env_file)
 
-    BASE_URL = env.get("BASE_URL")
-    API_KEY = env.get("API_KEY")
-    media_paths = env.get("MEDIA_PATHS")
+    BASE_URL: str | None = env.get("BASE_URL")
+    API_KEY: str | None = env.get("API_KEY")
+    media_paths: str | None = env.get("MEDIA_PATHS")
+    wifi_only: bool = str_to_bool(env.get("WIFI_ONLY", False))
+    ssid: str | None = env.get("SSID")
+    not_metered: bool = str_to_bool(env.get("NOT_METERED", False))
+    debug: bool = str_to_bool(env.get("DEBUG", True))
+
+    configure_logger(debug)
 
     if not BASE_URL or not API_KEY:
         logger.error(f"Please set BASE_URL and API_KEY in {env_file}")
@@ -122,7 +177,9 @@ async def run():
 
     # Create asynchronous tasks for both the watcher and uploader.
     watcher_task = asyncio.create_task(watcher(db, file_queue))
-    uploader_task = asyncio.create_task(uploader(db, BASE_URL, API_KEY))
+    uploader_task = asyncio.create_task(
+        uploader(db, BASE_URL, API_KEY, wifi_only, ssid, not_metered)
+    )
 
     # Wait until shutdown_event is set (via signal)
     await shutdown_event.wait()
@@ -143,6 +200,7 @@ async def run():
 
     await db.close()
     logger.info("Shutdown complete.")
+
 
 def main():
     asyncio.run(run())
