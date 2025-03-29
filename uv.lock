@@ -1,4 +1,5 @@
 version = 1
+revision = 1
 requires-python = ">=3.11"
 
 [[package]]
@@ -212,6 +213,7 @@ dependencies = [
     { name = "imohash" },
     { name = "loguru" },
     { name = "pyxdg" },
+    { name = "sdbus-networkmanager" },
     { name = "watchdog" },
 ]
 
@@ -231,6 +233,7 @@ requires-dist = [
     { name = "imohash", specifier = ">=1.1.0" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "pyxdg", specifier = ">=0.28" },
+    { name = "sdbus-networkmanager", specifier = ">=2.0.0" },
     { name = "watchdog", specifier = ">=6.0.0" },
 ]
 
@@ -506,6 +509,28 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/d9/3a/a647fa4f316482dacf2fd68e8a386327a33d6eabd8eb2f9a0c3d291ec549/ruff-0.11.2-py3-none-win32.whl", hash = "sha256:aca01ccd0eb5eb7156b324cfaa088586f06a86d9e5314b0eb330cb48415097cc", size = 10319835 },
     { url = "https://files.pythonhosted.org/packages/86/54/3c12d3af58012a5e2cd7ebdbe9983f4834af3f8cbea0e8a8c74fa1e23b2b/ruff-0.11.2-py3-none-win_amd64.whl", hash = "sha256:3170150172a8f994136c0c66f494edf199a0bbea7a409f649e4bc8f4d7084080", size = 11373713 },
     { url = "https://files.pythonhosted.org/packages/d6/d4/dd813703af8a1e2ac33bf3feb27e8a5ad514c9f219df80c64d69807e7f71/ruff-0.11.2-py3-none-win_arm64.whl", hash = "sha256:52933095158ff328f4c77af3d74f0379e34fd52f175144cefc1b192e7ccd32b4", size = 10441990 },
+]
+
+[[package]]
+name = "sdbus"
+version = "0.13.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/4f/c7/8740ff78e9ffdbb9a28e7722e145795015c62ea7ce812242f5968073511c/sdbus-0.13.0.tar.gz", hash = "sha256:801bd46608ee82614d42960c8ba8ae9300edb1bf5bbeb534bc8fd21f13d2c20e", size = 85887 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/85/fb/060bc3ffdbfae6062800ee516b68c5a050e5c4cb9424759a7650462a9f5b/sdbus-0.13.0-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:fcc88e70e76723234fd0987edccbcc3fe5f4e99245eb30a6b362ef7f882fd8a3", size = 540599 },
+    { url = "https://files.pythonhosted.org/packages/57/33/5d6d93d2897901cf503ed6db47b10208195fedaa0ed4e9f7c9f511fc649c/sdbus-0.13.0-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:199a4c321fc5b4cded57a110f82625f6541909c40e733f574d12afc5ace149a7", size = 539172 },
+]
+
+[[package]]
+name = "sdbus-networkmanager"
+version = "2.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "sdbus" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/31/ab/e864c6c2eb778c194cfb56cd9d98b5594dc00573210fdf6b44904745a0bf/sdbus-networkmanager-2.0.0.tar.gz", hash = "sha256:3572ac3a8189c683ec0416acb148761773a8f0881ad3d78b6d6f6864eff9c50b", size = 165071 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/04/0c/6a67ebd967f3816022d04ab93db5f3d998a55d79c138af11feb1f59a6f10/sdbus_networkmanager-2.0.0-py3-none-any.whl", hash = "sha256:710a5ccfb1c3267016c990023ca76ad6210b13ab63aa5dad3a20e590b291b08f", size = 248349 },
 ]
 
 [[package]]

@@ -90,4 +90,9 @@ async def scan_existing_files(paths: list[str], db: Database, new_file_event: as
 
                 except Exception as e:
                     logger.error(f"Error processing {file_path}: {e}")
+
+    # Check if unuploaded and if there is any then start the uploader incase there were lingering files
+    if await db.get_unuploaded():
+        new_file_event.set()
+
     logger.info("Finished scanning existing files.")
