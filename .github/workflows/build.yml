@@ -83,3 +83,12 @@ jobs:
           file: ${{ github.workspace }}/*.${{ matrix.package }}
           tag: ${{ github.ref }}
           file_glob: true
+  build-nix:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: cachix/install-nix-action@v30
+      with:
+        extra_nix_config: extra-experimental-features = nix-command flakes
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - run: nix build
