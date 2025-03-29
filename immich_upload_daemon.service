@@ -3,9 +3,12 @@ Description=Immich Upload Daemon
 After=network.target
 
 [Service]
+Environment=PYTHONUNBUFFERED=1
 Type=simple
 ExecStart=/usr/bin/immich_upload_daemon
 Restart=on-failure
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=default.target
