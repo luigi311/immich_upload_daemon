@@ -83,16 +83,16 @@ async def create_default_config(env_file: str):
     # Create a default env file if it doesn't exist
     async with open(env_file, "w") as f:
         await f.write(
-            """BASE_URL=
-API_KEY=
-MEDIA_PATHS=
-CHUNK_SIZE=
+            """BASE_URL
+API_KEY
+MEDIA_PATHS
+CHUNK_SIZE=65536
 DEBUG=True
 
 # Conditions
-WIFI_ONLY=
-SSID=
-NOT_METERED=
+WIFI_ONLY=False
+SSID
+NOT_METERED=False
 """
         )
 
@@ -120,21 +120,28 @@ async def run():
         await create_default_config(env_file)
 
     env = dotenv_values(env_file)
-
+    print(env)
     BASE_URL: str | None = env.get("BASE_URL")
     API_KEY: str | None = env.get("API_KEY")
     media_paths: str | None = env.get("MEDIA_PATHS")
-    chunk_size: int = int(env.get("CHUNK_SIZE", 8192*8))
-    wifi_only: bool = str_to_bool(env.get("WIFI_ONLY", False))
+    chunk_size: int | str | None = env.get("CHUNK_SIZE", 65536)
+    wifi_only: bool = str_to_bool(env.get("WIFI_ONLY"))
     ssid: str | None = env.get("SSID")
-    not_metered: bool = str_to_bool(env.get("NOT_METERED", False))
-    debug: bool = str_to_bool(env.get("DEBUG", True))
+    not_metered: bool = str_to_bool(env.get("NOT_METERED"))
+    debug: bool = str_to_bool(env.get("DEBUG"))
 
     configure_logger(debug)
 
     if not BASE_URL or not API_KEY:
         logger.error(f"Please set BASE_URL and API_KEY in {env_file}")
         return
+
+    # Default chunk_size
+    # Fallback for if chunk_size key exists but not set
+    if not chunk_size:
+        chunk_size = 65536
+    if isinstance(chunk_size, str):
+        chunk_size = int(chunk_size)
 
     # Strip trailing slashes
     BASE_URL = BASE_URL.rstrip("/")
@@ -211,7 +218,8 @@ async def run():
 
 
 def main():
-    uvloop.run(run())
+    uvloop.install()
+    asyncio.run(run())
 
 
 if __name__ == "__main__":
