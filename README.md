@@ -61,12 +61,12 @@ immich_upload_daemon
 For users who prefer a prebuilt binary, .deb packages are provided via GitHub Releases.
 
 1. **Download the .deb Package**  
-   Navigate to the [GitHub Releases page](https://github.com/luigi311/immich_upload_daemon/releases) and download the appropriate package for your system architecture (e.g., `immich-upload-daemon-x86_64.deb` or `immich-upload-daemon-arm64.deb`).
+   Navigate to the [GitHub Releases page](https://github.com/luigi311/immich_upload_daemon/releases) and download the appropriate package for your system architecture (e.g., `immich_upload_daemon-x86_64.deb` or `immich_upload_daemon-arm64.deb`).
 
 2. **Install the Package**  
    Once downloaded, install the package using your package manager. For example, on Debian-based systems:
    ```sh
-   sudo dpkg -i ./immich-upload-daemon-*.deb
+   sudo dpkg -i ./immich_upload_daemon-*.deb
    ```
    If any dependency errors occur, run:
    ```sh

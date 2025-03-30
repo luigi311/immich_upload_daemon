@@ -18,9 +18,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04
-            name: immich-upload-daemon-x86_64
+            name: immich_upload_daemon-x86_64
           - os: ubuntu-24.04-arm
-            name: immich-upload-daemon-arm64
+            name: immich_upload_daemon-arm64
   
     steps:
       - uses: actions/checkout@v4
@@ -74,10 +74,10 @@ jobs:
         include:
           - os: ubuntu-24.04
             package: deb
-            name: immich-upload-daemon-x86_64
+            name: immich_upload_daemon-x86_64
           - os: ubuntu-24.04-arm
             package: deb
-            name: immich-upload-daemon-arm64
+            name: immich_upload_daemon-arm64
     steps:
       - uses: actions/checkout@v4
 
