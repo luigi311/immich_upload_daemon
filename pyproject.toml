@@ -17,6 +17,7 @@ dependencies = [
     "loguru>=0.7.3",
     "pyxdg>=0.28",
     "sdbus-networkmanager>=2.0.0",
+    "uvloop>=0.21.0",
     "watchdog>=6.0.0",
 ]
 

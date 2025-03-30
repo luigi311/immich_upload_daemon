@@ -1,4 +1,5 @@
 import asyncio
+import uvloop
 import os
 import signal
 import sys
@@ -203,7 +204,7 @@ async def run():
 
 
 def main():
-    asyncio.run(run())
+    uvloop.run(run())
 
 
 if __name__ == "__main__":

@@ -34,7 +34,7 @@ async def upload(base_url: str, api_key: str, file: str) -> bool:
             for key, value in data.items():
                 form.add_field(key, value)
             
-            file_iter = file_chunk_generator(file, chunk_size=8192)
+            file_iter = file_chunk_generator(file, chunk_size=8192*8)
             file_payload = aiohttp.AsyncIterablePayload(
                 file_iter,
                 size=file_size,
