@@ -33,6 +33,7 @@ Before running the daemon, configure your environment settings:
    - **BASE_URL**: Base URL of your Immich server.
    - **API_KEY**: Your Immich API key.
    - **MEDIA_PATHS**: Comma-separated directories to monitor (e.g., `~/Pictures, ~/Videos`).
+   - **CHUNK_SIZE**: Reading chunk size, increase to improve speed at cost of memory. Default 65536
    - **WIFI_ONLY**: Set to `true` if uploads should occur only over WiFi.
    - **SSID**: (Optional) Specific WiFi network name to check when WIFI_ONLY is enabled.
    - **NOT_METERED**: Set to `true` to upload only on non-metered networks.

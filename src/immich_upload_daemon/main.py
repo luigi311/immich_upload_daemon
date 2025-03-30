@@ -47,6 +47,9 @@ async def uploader(
     db: Database,
     base_url: str,
     api_key: str,
+    chunk_size: int,
+    
+    # Conditions
     wifi_only: bool,
     ssid: str | None,
     not_metered: bool,
@@ -72,7 +75,7 @@ async def uploader(
             logger.info("Waiting for a new files...")
 
         for file_name in unuploaded:
-            if await upload(base_url, api_key, file_name):
+            if await upload(base_url, api_key, file_name, chunk_size):
                 await db.mark_uploaded(file_name)
 
 
@@ -83,10 +86,13 @@ async def create_default_config(env_file: str):
             """BASE_URL=
 API_KEY=
 MEDIA_PATHS=
+CHUNK_SIZE=
+DEBUG=True
+
+# Conditions
 WIFI_ONLY=
 SSID=
 NOT_METERED=
-DEBUG=True
 """
         )
 
@@ -118,6 +124,7 @@ async def run():
     BASE_URL: str | None = env.get("BASE_URL")
     API_KEY: str | None = env.get("API_KEY")
     media_paths: str | None = env.get("MEDIA_PATHS")
+    chunk_size: int = int(env.get("CHUNK_SIZE", 8192*8))
     wifi_only: bool = str_to_bool(env.get("WIFI_ONLY", False))
     ssid: str | None = env.get("SSID")
     not_metered: bool = str_to_bool(env.get("NOT_METERED", False))
@@ -179,7 +186,7 @@ async def run():
     # Create asynchronous tasks for both the watcher and uploader.
     watcher_task = asyncio.create_task(watcher(db, file_queue))
     uploader_task = asyncio.create_task(
-        uploader(db, BASE_URL, API_KEY, wifi_only, ssid, not_metered)
+        uploader(db, BASE_URL, API_KEY, chunk_size, wifi_only, ssid, not_metered)
     )
 
     # Wait until shutdown_event is set (via signal)
