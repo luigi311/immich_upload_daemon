@@ -130,6 +130,37 @@ This project uses [uv](https://github.com/astral-sh/uv) for dependency managemen
 6. **Install the Service File**  
    Copy the `immich_upload_daemon.service` file to your systemd user directory (typically `~/.config/systemd/user/` or `/usr/lib/systemd/user/`).
 
+
+### Using Nix
+
+#### Run the application once
+
+>environment file has to be present
+
+`nix run github:luigi311/immich_upload_daemon`
+
+#### Install and configure with Homemanager
+
+This flake outputs a homeManagerModule. It can be imported in a HomeManager Config. The following config configures the systemd service as well as the environment file:
+
+```nix
+services.immich-upload = {
+   enable = true;
+   baseUrl = "https://photos.example.com/api";
+   apiKey = secrets.immich.apiKey;
+   mediaPaths = [ 
+      "~/Pictures"
+      "~/Videos"
+   ];
+
+   # optional:
+   wifiOnly = true;
+   ssid = "veryCoolWifiName";
+   logLevel = "debug";
+   notMetered = true;
+};
+```
+
 ## Development
 
 Developers are welcome to contribute. Below are some guidelines:
