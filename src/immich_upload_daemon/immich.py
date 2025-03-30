@@ -6,7 +6,7 @@ from loguru import logger
 
 from .files import file_chunk_generator
 
-async def upload(base_url: str, api_key: str, file: str) -> bool:
+async def upload(base_url: str, api_key: str, file: str, chunk_size: int) -> bool:
     logger.info(f'Uploading {file}...')
     stats = os.stat(file)
     file_size = os.stat(file).st_size
@@ -34,7 +34,7 @@ async def upload(base_url: str, api_key: str, file: str) -> bool:
             for key, value in data.items():
                 form.add_field(key, value)
             
-            file_iter = file_chunk_generator(file, chunk_size=8192*8)
+            file_iter = file_chunk_generator(file, chunk_size=chunk_size)
             file_payload = aiohttp.AsyncIterablePayload(
                 file_iter,
                 size=file_size,
