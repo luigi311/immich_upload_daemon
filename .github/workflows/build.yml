@@ -64,7 +64,6 @@ jobs:
           file: ${{ github.workspace }}/dist/immich_upload_daemon
           asset_name: ${{ matrix.name }}
           tag: ${{ github.ref }}
-          file_glob: true
 
   release:
     needs: build
