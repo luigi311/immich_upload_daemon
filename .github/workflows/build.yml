@@ -18,11 +18,10 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04
-            package: deb
-            name: immich-upload-daemon-x86_64.deb
+            name: immich-upload-daemon-x86_64
           - os: ubuntu-24.04-arm
-            package: deb
-            name: immich-upload-daemon-arm64.deb
+            name: immich-upload-daemon-arm64
+  
     steps:
       - uses: actions/checkout@v4
 
@@ -50,6 +49,45 @@ jobs:
             --scie eager \
             --scie-pbs-stripped
 
+      - name: "Upload Pex"
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: |
+            dist/immich_upload_daemon
+      
+      - name: Upload pex to GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ github.workspace }}/dist/immich_upload_daemon
+          asset_name: ${{ matrix.name }}
+          tag: ${{ github.ref }}
+          file_glob: true
+
+  release:
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            package: deb
+            name: immich-upload-daemon-x86_64
+          - os: ubuntu-24.04-arm
+            package: deb
+            name: immich-upload-daemon-arm64
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: dist
+
       - name: "Setup ruby"
         uses: ruby/setup-ruby@v1
         with:
@@ -68,14 +106,14 @@ jobs:
             --deb-systemd-path /usr/lib/systemd/user \
             dist/immich_upload_daemon=/usr/bin/immich_upload_daemon 
 
-      - name: "Upload artifact"
+      - name: "Upload Package"
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.name }}
+          name: ${{ matrix.name }}.${{ matrix.package }}
           path: |
             *.${{ matrix.package }}
 
-      - name: Upload binaries to GitHub Releases
+      - name: Upload packages to GitHub Releases
         if: startsWith(github.ref, 'refs/tags/')
         uses: svenstaro/upload-release-action@v2
         with:
@@ -83,7 +121,7 @@ jobs:
           file: ${{ github.workspace }}/*.${{ matrix.package }}
           tag: ${{ github.ref }}
           file_glob: true
-  
+
   # Nix Build with the only purpose of testing if the build succeeds
   build-nix:
     runs-on: ubuntu-latest
