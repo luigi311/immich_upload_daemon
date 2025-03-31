@@ -87,6 +87,9 @@ jobs:
           name: ${{ matrix.name }}
           path: dist
 
+      - name: Fix permissions
+        run: chmod +x dist/*
+
       - name: "Setup ruby"
         uses: ruby/setup-ruby@v1
         with:
