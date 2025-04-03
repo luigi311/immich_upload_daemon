@@ -141,6 +141,13 @@
                 example: [ "~/Pictures" "~/Videos" ]
               '';
             };
+            chunkSize = lib.mkOption {
+              type = uniq ints.positive;
+              default = 65536;
+              description = ''
+                Reading chunk size, increase to improve speed at cost of memory. 
+              '';
+            };
             wifiOnly = lib.mkOption {
               type = bool;
               default = false;
@@ -180,6 +187,7 @@
                 BASE_URL="${cfg.baseUrl}"
                 API_KEY="${cfg.apiKey}"
                 MEDIA_PATHS="${builtins.concatStringsSep "," cfg.mediaPaths}"
+                CHUNK_SIZE=${builtins.toString cfg.chunkSize}
                 WIFI_ONLY=${if cfg.wifiOnly then "True" else "False"}
                 SSID="${cfg.ssid}"
                 NOT_METERED=${if cfg.notMetered then "True" else "False"}
