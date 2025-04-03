@@ -120,7 +120,7 @@ async def run():
         await create_default_config(env_file)
 
     env = dotenv_values(env_file)
-    print(env)
+
     BASE_URL: str | None = env.get("BASE_URL")
     API_KEY: str | None = env.get("API_KEY")
     media_paths: str | None = env.get("MEDIA_PATHS")
