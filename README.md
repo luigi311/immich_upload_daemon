@@ -159,6 +159,7 @@ services.immich-upload = {
    ssid = "veryCoolWifiName";
    logLevel = "debug";
    notMetered = true;
+   chunkSize = 65536;
 };
 ```
 
