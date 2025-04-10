@@ -68,6 +68,27 @@ class Database:
             logger.error(f"Error adding media {file_name}: {e}")
             return False
 
+    async def remove_media(self, file_name: str) -> bool:
+        """Remove media in the database"""
+        try:
+            logger.info(f"Removing {file_name} from database")
+            if not file_name:
+                logger.warning(f"File name {file_name} not valid, skipping")
+                return False
+            
+            cursor = await self.connection.cursor()
+            await cursor.execute("DELETE FROM media WHERE file_name = ?", (file_name,))
+            
+            await self.connection.commit()
+
+        except Exception as e:
+            logger.error(f"Error removing media {file_name}: {e}")
+            logger.error("Rolling back database")
+
+            await self.connection.rollback()
+            return False
+
+
     async def mark_uploaded(self, file_name: str) -> None:
         try:
             logger.info(f"Marking {file_name} as uploaded")

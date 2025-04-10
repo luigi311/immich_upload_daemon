@@ -7,27 +7,27 @@ from loguru import logger
 from .files import file_chunk_generator
 
 async def upload(base_url: str, api_key: str, file: str, chunk_size: int) -> bool:
-    logger.info(f'Uploading {file}...')
-    stats = os.stat(file)
-    file_size = os.stat(file).st_size
-
-    headers = {
-        'Accept': 'application/json',
-        'x-api-key': api_key,
-    }
-
-    # Convert timestamps to ISO format for JSON compatibility.
-    data = {
-        'deviceAssetId': f'{file}-{stats.st_mtime}',
-        'deviceId': 'python',
-        'fileCreatedAt': datetime.fromtimestamp(stats.st_mtime).isoformat(),
-        'fileModifiedAt': datetime.fromtimestamp(stats.st_mtime).isoformat(),
-        'fileSize': str(file_size),
-        'isFavorite': 'false',
-    }
-
-    timeout = aiohttp.ClientTimeout(total=60*60)
     try:
+        logger.info(f'Uploading {file}...')
+        stats = os.stat(file)
+        file_size = os.stat(file).st_size
+
+        headers = {
+            'Accept': 'application/json',
+            'x-api-key': api_key,
+        }
+
+        # Convert timestamps to ISO format for JSON compatibility.
+        data = {
+            'deviceAssetId': f'{file}-{stats.st_mtime}',
+            'deviceId': 'python',
+            'fileCreatedAt': datetime.fromtimestamp(stats.st_mtime).isoformat(),
+            'fileModifiedAt': datetime.fromtimestamp(stats.st_mtime).isoformat(),
+            'fileSize': str(file_size),
+            'isFavorite': 'false',
+        }
+
+        timeout = aiohttp.ClientTimeout(total=60*60)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             # Build the form-data for upload.
             form = aiohttp.FormData()
@@ -63,6 +63,10 @@ async def upload(base_url: str, api_key: str, file: str, chunk_size: int) -> boo
                     return True
                 logger.error(f'Failed to upload {file}: {response_json}')
                 return False
+    except FileNotFoundError:
+        logger.warning(f"File {file} no longer exists")
+        raise FileNotFoundError
+
     except Exception as e:
         logger.error(f"Failed to upload {file}: {e}")
         return False

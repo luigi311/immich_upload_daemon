@@ -75,8 +75,11 @@ async def uploader(
             logger.info("Waiting for a new files...")
 
         for file_name in unuploaded:
-            if await upload(base_url, api_key, file_name, chunk_size):
-                await db.mark_uploaded(file_name)
+            try:
+                if await upload(base_url, api_key, file_name, chunk_size):
+                    await db.mark_uploaded(file_name)
+            except FileNotFoundError:
+                await db.remove_media(file_name)
 
 
 async def create_default_config(env_file: str):
