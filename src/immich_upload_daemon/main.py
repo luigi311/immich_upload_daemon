@@ -48,7 +48,6 @@ async def uploader(
     base_url: str,
     api_key: str,
     chunk_size: int,
-    
     # Conditions
     wifi_only: bool,
     ssid: str | None,
@@ -68,7 +67,7 @@ async def uploader(
 
         unuploaded = await db.get_unuploaded()
 
-        # Only clear when unuploaded comes back empty to prevent issues with 
+        # Only clear when unuploaded comes back empty to prevent issues with
         # new files being discovered during the uploading process
         if not unuploaded:
             new_file_event.clear()
@@ -78,6 +77,7 @@ async def uploader(
             try:
                 if await upload(base_url, api_key, file_name, chunk_size):
                     await db.mark_uploaded(file_name)
+            
             except FileNotFoundError:
                 await db.remove_media(file_name)
 

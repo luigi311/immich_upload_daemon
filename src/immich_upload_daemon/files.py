@@ -47,6 +47,7 @@ SUPPORTED_MEDIA_EXTENSIONS = (
     ".wmv",
 )
 
+
 class MediaFileHandler(FileSystemEventHandler):
     """
     Watchdog event handler that looks for newly created media files.
@@ -67,7 +68,9 @@ class MediaFileHandler(FileSystemEventHandler):
             self.loop.call_soon_threadsafe(self.queue.put_nowait, event.src_path)
 
 
-async def scan_existing_files(paths: list[str], db: Database, new_file_event: asyncio.Event) -> None:
+async def scan_existing_files(
+    paths: list[str], db: Database, new_file_event: asyncio.Event
+) -> None:
     """
     Scan the provided directories for existing media files and add them to the database.
     The scanning is performed in a thread to avoid blocking the event loop.
@@ -100,7 +103,7 @@ async def scan_existing_files(paths: list[str], db: Database, new_file_event: as
 
 
 async def file_chunk_generator(file_path, chunk_size=8192):
-    async with aiofiles.open(file_path, 'rb') as f:
+    async with aiofiles.open(file_path, "rb") as f:
         while True:
             chunk = await f.read(chunk_size)
             if not chunk:

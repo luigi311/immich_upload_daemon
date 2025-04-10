@@ -56,8 +56,7 @@ async def check_network_conditions(
     if not settings:
         logger.warning("Not on a network connection")
         return False
-    
-    
+
     device_types = await get_device_types()
     connection = settings.get("connection")
 
@@ -99,7 +98,9 @@ async def check_network_conditions(
 
             wireless_settings_ssid_name = wireless_settings_ssid[1].decode("utf-8")
             if wireless_settings_ssid_name != ssid:
-                logger.warning(f"SSID {wireless_settings_ssid_name} does not match {ssid}")
+                logger.warning(
+                    f"SSID {wireless_settings_ssid_name} does not match {ssid}"
+                )
                 return False
 
     return True
