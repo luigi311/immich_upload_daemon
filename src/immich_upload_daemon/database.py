@@ -5,6 +5,7 @@ from loguru import logger
 from imohash import hashfile
 from xdg.BaseDirectory import save_data_path
 
+
 def get_db_path(db_name: str) -> str:
     """
     Returns a path for the database file using XDG Base Directory.
@@ -12,6 +13,7 @@ def get_db_path(db_name: str) -> str:
     """
     app_data_dir = save_data_path("immich_uploader")
     return os.path.join(app_data_dir, db_name)
+
 
 class Database:
     def __init__(self, db_file: str) -> None:
@@ -29,9 +31,12 @@ class Database:
             )
 
             # Create an index on uploaded column for faster retrieval.
-            await self.conn.execute("CREATE INDEX IF NOT EXISTS idx_uploaded ON media (uploaded)")
+            await self.conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_uploaded ON media (uploaded)"
+            )
 
             await self.conn.commit()
+
         except Exception as e:
             logger.error(f"Failed to initialize database: {e}")
             raise e
@@ -39,7 +44,10 @@ class Database:
     @property
     def connection(self) -> aiosqlite.Connection:
         if self.conn is None:
-            raise RuntimeError("Database connection is not initialized. Call init_db() first.")
+            raise RuntimeError(
+                "Database connection is not initialized. Call init_db() first."
+            )
+
         return self.conn
 
     async def add_media(self, file_name: str) -> bool:
@@ -48,7 +56,8 @@ class Database:
             # Check if file_name and file_hash already exist in the database.
             file_hash = hashfile(file_name, hexdigest=True)
             async with self.connection.execute(
-                "SELECT * FROM media WHERE file_name = ? AND file_hash = ?", (file_name, file_hash)
+                "SELECT * FROM media WHERE file_name = ? AND file_hash = ?",
+                (file_name, file_hash),
             ) as cursor:
                 row = await cursor.fetchone()
 
@@ -64,28 +73,55 @@ class Database:
             )
             await self.connection.commit()
             return True
+
         except Exception as e:
             logger.error(f"Error adding media {file_name}: {e}")
+            return False
+
+    async def remove_media(self, file_name: str) -> bool:
+        """Remove media in the database"""
+        try:
+            logger.info(f"Removing {file_name} from database")
+            if not file_name:
+                logger.warning(f"File name {file_name} not valid, skipping")
+                return False
+
+            cursor = await self.connection.cursor()
+            await cursor.execute("DELETE FROM media WHERE file_name = ?", (file_name,))
+
+            await self.connection.commit()
+
+        except Exception as e:
+            logger.error(f"Error removing media {file_name}: {e}")
+            logger.error("Rolling back database")
+
+            await self.connection.rollback()
             return False
 
     async def mark_uploaded(self, file_name: str) -> None:
         try:
             logger.info(f"Marking {file_name} as uploaded")
 
-            await self.connection.execute("UPDATE media SET uploaded = 1 WHERE file_name = ?", (file_name,))
+            await self.connection.execute(
+                "UPDATE media SET uploaded = 1 WHERE file_name = ?", (file_name,)
+            )
             await self.connection.commit()
+
         except Exception as e:
             logger.error(f"Error marking {file_name} as uploaded: {e}")
             return
 
     async def get_unuploaded(self) -> list[str]:
         try:
-            async with self.connection.execute("SELECT file_name FROM media WHERE uploaded = 0") as cursor:
+            async with self.connection.execute(
+                "SELECT file_name FROM media WHERE uploaded = 0"
+            ) as cursor:
                 rows = await cursor.fetchall()
 
                 if rows:
                     return [row[0] for row in rows]
-                return [] 
+                return []
+
         except Exception as e:
             logger.error(f"Error retrieving unuploaded media: {e}")
             return []
