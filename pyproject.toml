@@ -1,6 +1,6 @@
 [project]
 name = "immich-upload-daemon"
-version = "0.1.6"
+version = "0.1.7"
 description = "Immich Upload Daemon is a tool designed to monitor your media directories for new image and video files and automatically upload them to an Immich server."
 readme = "README.md"
 authors = [
