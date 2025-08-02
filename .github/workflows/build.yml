@@ -21,9 +21,15 @@ jobs:
             name: immich_upload_daemon-x86_64
           - os: ubuntu-24.04-arm
             name: immich_upload_daemon-arm64
-  
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          create-symlink: true
+          key: ${{ github.job }}-${{ matrix.os }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -35,7 +41,13 @@ jobs:
 
       - name: "Install dependencies"
         run: uv sync --frozen --dev
-        
+
+      - name: Check ccache in PATH
+        run: |
+          which gcc
+          readlink -f $(which gcc)
+          ccache -s
+
       - name: "Build"
         run: uv run build.py
 
@@ -84,7 +96,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ruby
-          
+
       - name: "Install fpm"
         run: gem install fpm
 
@@ -96,7 +108,7 @@ jobs:
             -v "$VERSION" \
             --deb-systemd systemd/immich_upload_daemon.service \
             --deb-systemd-path /usr/lib/systemd/user \
-            dist/immich_upload_daemon=/usr/bin/immich_upload_daemon 
+            dist/immich_upload_daemon=/usr/bin/immich_upload_daemon
 
       - name: "Upload Package"
         uses: actions/upload-artifact@v4
