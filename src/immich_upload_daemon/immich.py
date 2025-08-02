@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 from loguru import logger
 
-from .files import file_chunk_generator
+from immich_upload_daemon.files import file_chunk_generator
 
 
 async def upload(base_url: str, api_key: str, file: str, chunk_size: int) -> bool:

@@ -23,6 +23,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "nuitka>=2.7.12",
     "ruff>=0.11.2",
     "types-aiofiles>=24.1.0.20241221",
     "types-pyxdg>=0.28.0.20240106",
@@ -34,3 +35,4 @@ immich_upload_daemon = "immich_upload_daemon.main:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+

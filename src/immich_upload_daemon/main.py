@@ -10,11 +10,11 @@ from loguru import logger
 from watchdog.observers import Observer
 from xdg.BaseDirectory import xdg_config_home
 
-from .immich import upload
-from .database import Database, get_db_path
-from .files import MediaFileHandler, scan_existing_files
-from .network import check_network_conditions
-from .utils import str_to_bool
+from immich_upload_daemon.immich import upload
+from immich_upload_daemon.database import Database, get_db_path
+from immich_upload_daemon.files import MediaFileHandler, scan_existing_files
+from immich_upload_daemon.network import check_network_conditions
+from immich_upload_daemon.utils import str_to_bool
 
 # A global event to signal shutdown
 shutdown_event = asyncio.Event()

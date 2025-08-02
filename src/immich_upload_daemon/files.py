@@ -5,7 +5,7 @@ import aiofiles
 from loguru import logger
 from watchdog.events import FileSystemEventHandler
 
-from .database import Database
+from immich_upload_daemon.database import Database
 
 # Source: https://github.com/immich-app/immich/blob/main/docs/docs/features/supported-formats.md?plain=1
 SUPPORTED_MEDIA_EXTENSIONS = (
