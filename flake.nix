@@ -128,9 +128,17 @@
               '';
             };
             apiKey = lib.mkOption {
-              type = uniq str;
+              type = nullOr str;
+              default = null;
               description = ''
                 Your API KEY. you can generate one in you Immich user settings
+              '';
+            };
+            apiKeyFile = lib.mkOption {
+              type = nullOr path;
+              default = null;
+              description = ''
+                If API_KEY is not set, the key is read from this file.
               '';
             };
             mediaPaths = lib.mkOption {
@@ -185,7 +193,14 @@
               force = true;
               text = ''
                 BASE_URL="${cfg.baseUrl}"
-                API_KEY="${cfg.apiKey}"
+                
+                ${ if cfg.apiKey != null then
+                    "API_KEY=\"${cfg.apiKey}\""
+                   else if cfg.apiKeyFile != null then
+                    "API_KEY_FILE=\"${builtins.toString cfg.apiKeyFile}\""
+                   else
+                    throw "you need to provide either apiKey or apiKeyFile for immich-upload-deamon."
+                }
                 MEDIA_PATHS="${builtins.concatStringsSep "," cfg.mediaPaths}"
                 CHUNK_SIZE=${builtins.toString cfg.chunkSize}
                 WIFI_ONLY=${if cfg.wifiOnly then "True" else "False"}
