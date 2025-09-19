@@ -111,6 +111,17 @@ def configure_logger(debug: bool) -> None:
     logger.add(sys.stdout, level=level)
 
 
+async def read_key(path: str | None) -> str | None:
+    if not path:
+        return None
+    try:
+        async with open(path, "r") as f:
+            return (await f.read()).strip()
+    except OSError:
+        logger.error(f"Failed to read API key from {path}")
+        return None
+
+
 async def run():
     # Load environment variables
     env_file = os.path.join(
@@ -125,7 +136,10 @@ async def run():
     env = dotenv_values(env_file)
 
     BASE_URL: str | None = env.get("BASE_URL")
-    API_KEY: str | None = env.get("API_KEY")
+    API_KEY: str | None = (
+        env.get("API_KEY") 
+        or await read_key(env.get("API_KEY_FILE"))
+    )
     media_paths: str | None = env.get("MEDIA_PATHS")
     chunk_size: int | str | None = env.get("CHUNK_SIZE", 65536)
     wifi_only: bool = str_to_bool(env.get("WIFI_ONLY"))
