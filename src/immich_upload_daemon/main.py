@@ -3,8 +3,8 @@ import uvloop
 import os
 import signal
 import sys
-import aiofiles
 
+from aiofiles import open
 from dotenv import dotenv_values
 from loguru import logger
 from watchdog.observers import Observer
@@ -84,7 +84,7 @@ async def uploader(
 
 async def create_default_config(env_file: str):
     # Create a default env file if it doesn't exist
-    async with aiofiles.open(env_file, "w") as f:
+    async with open(env_file, "w") as f:
         await f.write(
             """BASE_URL
 API_KEY
@@ -126,11 +126,10 @@ async def run():
 
     BASE_URL: str | None = env.get("BASE_URL")
     API_KEY: str | None = env.get("API_KEY")
-    if API_KEY is None:
-        api_key_file = env.get("API_KEY_FILE")
-    if api_key_file:
-        with open(api_key_file, "r") as f:
-            API_KEY = f.read().strip()
+    API_KEY_FILE: str | None = env.get("API_KEY_FILE")
+    if API_KEY is None and API_KEY_FILE is not None:
+        async with open(API_KEY_FILE, "r") as f:
+            API_KEY = (await f.read()).strip()
     media_paths: str | None = env.get("MEDIA_PATHS")
     chunk_size: int | str | None = env.get("CHUNK_SIZE", 65536)
     wifi_only: bool = str_to_bool(env.get("WIFI_ONLY"))
